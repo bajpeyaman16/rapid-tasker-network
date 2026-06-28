@@ -16,12 +16,11 @@ function WorkerProfile() {
   const { data: w } = useQuery({
     queryKey: ["worker", id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("worker_profiles")
-        .select("*, profiles!worker_profiles_id_fkey(full_name, avatar_url, city, phone)")
-        .eq("id", id).maybeSingle();
+      const { data: wp, error } = await supabase.from("worker_profiles").select("*").eq("id", id).maybeSingle();
       if (error) throw error;
-      return data;
+      if (!wp) return null;
+      const { data: prof } = await supabase.from("profiles").select("full_name, avatar_url, city, phone").eq("id", id).maybeSingle();
+      return { ...wp, profile: prof };
     },
   });
 

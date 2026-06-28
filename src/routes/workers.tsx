@@ -88,14 +88,14 @@ function Workers() {
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {workers?.map((w: any) => (
+              {workers?.map((w) => (
                 <article key={w.id} className="rounded-2xl border border-border bg-card p-5">
                   <div className="flex items-center gap-3">
                     <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-primary-soft text-primary font-display text-lg font-bold">
-                      {(w.profiles?.full_name ?? "?").slice(0,1).toUpperCase()}
+                      {(w.profile?.full_name ?? "?").slice(0,1).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="truncate font-display font-semibold text-ink">{w.profiles?.full_name ?? "Worker"}</h3>
+                      <h3 className="truncate font-display font-semibold text-ink">{w.profile?.full_name ?? "Worker"}</h3>
                       <p className="truncate text-xs text-muted-foreground">{w.headline ?? (w.categories?.[0] ?? "Local pro")}</p>
                     </div>
                     {w.is_verified && <ShieldCheck className="ml-auto h-4 w-4 text-primary" />}
@@ -103,7 +103,7 @@ function Workers() {
 
                   <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1"><Star className="h-3 w-3 fill-warning text-warning" /> {Number(w.rating ?? 0).toFixed(1)} ({w.reviews_count ?? 0})</span>
-                    <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {w.city ?? w.profiles?.city ?? "—"}</span>
+                    <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {w.city ?? w.profile?.city ?? "—"}</span>
                     {w.hourly_rate && <span className="font-semibold text-ink">₹{w.hourly_rate}/hr</span>}
                   </div>
 
@@ -114,7 +114,7 @@ function Workers() {
                   )}
 
                   <div className="mt-4 grid grid-cols-3 gap-2">
-                    <Button size="sm" variant="outline" disabled={!w.profiles?.phone}><Phone className="h-3.5 w-3.5" /></Button>
+                    <Button size="sm" variant="outline" disabled={!w.profile?.phone}><Phone className="h-3.5 w-3.5" /></Button>
                     <Button size="sm" variant="outline"><MessageSquare className="h-3.5 w-3.5" /></Button>
                     <Button asChild size="sm"><Link to="/workers/$id" params={{ id: w.id }}>View</Link></Button>
                   </div>
