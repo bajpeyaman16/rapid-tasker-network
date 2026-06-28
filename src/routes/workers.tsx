@@ -27,20 +27,23 @@ function Workers() {
     queryKey: ["workers", category, q],
     queryFn: async () => {
       const { data: ws, error } = await supabase
-        .from("worker_profiles")
-        .select("*, profiles!worker_profiles_id_fkey(full_name, avatar_url, city, phone)")
-        .order("rating", { ascending: false })
-        .limit(60);
+        .from("worker_profiles").select("*")
+        .order("rating", { ascending: false }).limit(60);
       if (error) throw error;
-      let list = ws ?? [];
+      const ids = (ws ?? []).map((w) => w.id);
+      const profiles = ids.length
+        ? (await supabase.from("profiles").select("id, full_name, avatar_url, city, phone").in("id", ids)).data ?? []
+        : [];
+      const pmap = new Map(profiles.map((p) => [p.id, p]));
+      let list = (ws ?? []).map((w) => ({ ...w, profile: pmap.get(w.id) ?? null }));
       if (category && category !== "all") {
         const name = CATEGORIES.find((c) => c.slug === category)?.name ?? category;
-        list = list.filter((w: any) => (w.categories ?? []).some((c: string) => c.toLowerCase() === name.toLowerCase()));
+        list = list.filter((w) => (w.categories ?? []).some((c: string) => c.toLowerCase() === name.toLowerCase()));
       }
       if (q.trim()) {
         const needle = q.toLowerCase();
-        list = list.filter((w: any) =>
-          (w.profiles?.full_name ?? "").toLowerCase().includes(needle) ||
+        list = list.filter((w) =>
+          (w.profile?.full_name ?? "").toLowerCase().includes(needle) ||
           (w.headline ?? "").toLowerCase().includes(needle) ||
           (w.skills ?? []).join(" ").toLowerCase().includes(needle)
         );
