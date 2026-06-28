@@ -47,17 +47,17 @@ function WorkerProfile() {
               <article className="rounded-2xl border border-border bg-card p-6">
                 <div className="flex flex-wrap items-start gap-5">
                   <div className="grid h-24 w-24 shrink-0 place-items-center rounded-2xl bg-primary-soft text-primary font-display text-3xl font-bold">
-                    {(w.profiles?.full_name ?? "?").slice(0,1).toUpperCase()}
+                    {(w.profile?.full_name ?? "?").slice(0,1).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h1 className="font-display text-2xl font-bold text-ink sm:text-3xl">{w.profiles?.full_name ?? "Worker"}</h1>
+                      <h1 className="font-display text-2xl font-bold text-ink sm:text-3xl">{w.profile?.full_name ?? "Worker"}</h1>
                       {w.is_verified && <Badge className="bg-primary-soft text-primary hover:bg-primary-soft"><ShieldCheck className="h-3 w-3" /> Verified</Badge>}
                     </div>
                     <p className="mt-1 text-muted-foreground">{w.headline ?? "Local professional"}</p>
                     <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
                       <span className="inline-flex items-center gap-1"><Star className="h-4 w-4 fill-warning text-warning" /> <b>{Number(w.rating ?? 0).toFixed(1)}</b> <span className="text-muted-foreground">({w.reviews_count ?? 0} reviews)</span></span>
-                      <span className="inline-flex items-center gap-1 text-muted-foreground"><MapPin className="h-4 w-4" /> {w.city ?? w.profiles?.city ?? "—"}</span>
+                      <span className="inline-flex items-center gap-1 text-muted-foreground"><MapPin className="h-4 w-4" /> {w.city ?? w.profile?.city ?? "—"}</span>
                       <span className="inline-flex items-center gap-1 text-muted-foreground"><Briefcase className="h-4 w-4" /> {w.experience_years} yrs experience</span>
                     </div>
                   </div>
@@ -117,7 +117,7 @@ function WorkerProfile() {
                   <div className="mt-4 space-y-2">
                     <Button asChild className="w-full"><Link to="/post-job">Hire / Request quote</Link></Button>
                     <div className="grid grid-cols-2 gap-2">
-                      <Button variant="outline" disabled={!w.profiles?.phone}><Phone className="h-4 w-4" /> Call</Button>
+                      <Button variant="outline" disabled={!w.profile?.phone}><Phone className="h-4 w-4" /> Call</Button>
                       <Button variant="outline"><MessageSquare className="h-4 w-4" /> Chat</Button>
                     </div>
                   </div>
