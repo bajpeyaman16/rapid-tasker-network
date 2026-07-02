@@ -67,6 +67,8 @@ export type Database = {
           id: string
           job_type: Database["public"]["Enums"]["job_type"]
           location: string
+          location_lat: number | null
+          location_lng: number | null
           scheduled_date: string | null
           special_instructions: string | null
           start_time: string | null
@@ -85,6 +87,8 @@ export type Database = {
           id?: string
           job_type?: Database["public"]["Enums"]["job_type"]
           location: string
+          location_lat?: number | null
+          location_lng?: number | null
           scheduled_date?: string | null
           special_instructions?: string | null
           start_time?: string | null
@@ -103,6 +107,8 @@ export type Database = {
           id?: string
           job_type?: Database["public"]["Enums"]["job_type"]
           location?: string
+          location_lat?: number | null
+          location_lng?: number | null
           scheduled_date?: string | null
           special_instructions?: string | null
           start_time?: string | null
