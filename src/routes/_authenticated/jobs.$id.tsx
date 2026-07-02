@@ -198,6 +198,27 @@ function JobDetail() {
               )}
             </article>
 
+            {ACTIVE_STATUSES.includes(job.status as any) && job.assigned_worker_id && (
+              <LiveTrackingMap job={{
+                id: job.id,
+                location: job.location,
+                location_lat: job.location_lat,
+                location_lng: job.location_lng,
+                assigned_worker_id: job.assigned_worker_id,
+              }} />
+            )}
+
+            {userId && job.assigned_worker_id === userId && ACTIVE_STATUSES.includes(job.status as any) && (
+              <section className="rounded-2xl border border-border bg-card p-5">
+                <h2 className="font-display text-base font-semibold text-ink">Live location sharing</h2>
+                <p className="mt-1 text-xs text-muted-foreground">Let the customer see where you are and your ETA in real time.</p>
+                <div className="mt-3">
+                  <WorkerLocationShare jobId={job.id} workerId={userId} />
+                </div>
+              </section>
+            )}
+
+
             {isCustomer && job.status === "pending" && (
               <section className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary-soft/60 to-card p-6">
                 <div className="flex items-center gap-2">
