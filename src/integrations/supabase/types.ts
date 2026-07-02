@@ -67,6 +67,8 @@ export type Database = {
           id: string
           job_type: Database["public"]["Enums"]["job_type"]
           location: string
+          location_lat: number | null
+          location_lng: number | null
           scheduled_date: string | null
           special_instructions: string | null
           start_time: string | null
@@ -85,6 +87,8 @@ export type Database = {
           id?: string
           job_type?: Database["public"]["Enums"]["job_type"]
           location: string
+          location_lat?: number | null
+          location_lng?: number | null
           scheduled_date?: string | null
           special_instructions?: string | null
           start_time?: string | null
@@ -103,6 +107,8 @@ export type Database = {
           id?: string
           job_type?: Database["public"]["Enums"]["job_type"]
           location?: string
+          location_lat?: number | null
+          location_lng?: number | null
           scheduled_date?: string | null
           special_instructions?: string | null
           start_time?: string | null
@@ -197,6 +203,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      worker_locations: {
+        Row: {
+          accuracy: number | null
+          heading: number | null
+          job_id: string | null
+          lat: number
+          lng: number
+          speed: number | null
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          accuracy?: number | null
+          heading?: number | null
+          job_id?: string | null
+          lat: number
+          lng: number
+          speed?: number | null
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          accuracy?: number | null
+          heading?: number | null
+          job_id?: string | null
+          lat?: number
+          lng?: number
+          speed?: number | null
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_locations_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       worker_profiles: {
         Row: {
