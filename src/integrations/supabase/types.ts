@@ -198,6 +198,47 @@ export type Database = {
         }
         Relationships: []
       }
+      worker_locations: {
+        Row: {
+          accuracy: number | null
+          heading: number | null
+          job_id: string | null
+          lat: number
+          lng: number
+          speed: number | null
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          accuracy?: number | null
+          heading?: number | null
+          job_id?: string | null
+          lat: number
+          lng: number
+          speed?: number | null
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          accuracy?: number | null
+          heading?: number | null
+          job_id?: string | null
+          lat?: number
+          lng?: number
+          speed?: number | null
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_locations_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       worker_profiles: {
         Row: {
           availability: Database["public"]["Enums"]["availability_status"]
