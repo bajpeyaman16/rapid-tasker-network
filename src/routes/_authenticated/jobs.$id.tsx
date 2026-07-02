@@ -12,6 +12,10 @@ import { Label } from "@/components/ui/label";
 import { SiteHeader } from "@/components/site-header";
 import { JobStatusBadge } from "./dashboard";
 import { recommendWorkersForJob, rankOffers } from "@/lib/recommendations";
+import { LiveTrackingMap } from "@/components/live-tracking-map";
+import { WorkerLocationShare } from "@/components/worker-location-share";
+
+const ACTIVE_STATUSES = ["accepted", "on_the_way", "started", "in_progress"] as const;
 
 export const Route = createFileRoute("/_authenticated/jobs/$id")({
   component: JobDetail,
