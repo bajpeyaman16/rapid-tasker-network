@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SiteHeader } from "@/components/site-header";
+
 import { CATEGORIES } from "@/lib/categories";
 
 export const Route = createFileRoute("/_authenticated/post-job")({
@@ -66,10 +66,8 @@ function PostJob() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SiteHeader />
-      <main className="container-x flex-1 py-8">
-        <div className="mx-auto max-w-3xl">
+    <div className="p-6">
+      <div className="mx-auto max-w-3xl">
           <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-ink">← Back to dashboard</Link>
           <h1 className="mt-3 font-display text-3xl font-bold text-ink">Post a job</h1>
           <p className="mt-1 text-muted-foreground">Tell us what you need. Nearby workers will see it instantly.</p>

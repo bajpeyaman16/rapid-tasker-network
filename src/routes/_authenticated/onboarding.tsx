@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SiteHeader } from "@/components/site-header";
+
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   validateSearch: z.object({ role: z.enum(["customer", "worker"]).optional() }),
@@ -56,10 +56,8 @@ function Onboarding() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SiteHeader />
-      <main className="container-x flex-1 py-10">
-        <div className="mx-auto max-w-2xl">
+    <div className="p-6">
+      <div className="mx-auto max-w-2xl">
           <h1 className="font-display text-3xl font-bold text-ink">Welcome to Local Work Network</h1>
           <p className="mt-2 text-muted-foreground">Tell us how you'll use the platform.</p>
 
