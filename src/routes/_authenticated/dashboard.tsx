@@ -8,7 +8,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { SiteHeader } from "@/components/site-header";
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -37,20 +37,12 @@ function Dashboard() {
   }, [navigate]);
 
   if (!role || !userId) {
-    return (
-      <div className="flex min-h-screen flex-col">
-        <SiteHeader />
-        <div className="container-x flex-1 py-20 text-center text-muted-foreground">Loading…</div>
-      </div>
-    );
+    return <div className="p-10 text-center text-muted-foreground">Loading…</div>;
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SiteHeader />
-      <main className="container-x flex-1 py-8">
-        {role === "customer" ? <CustomerView userId={userId} /> : <WorkerView userId={userId} />}
-      </main>
+    <div className="p-6">
+      {role === "customer" ? <CustomerView userId={userId} /> : <WorkerView userId={userId} />}
     </div>
   );
 }

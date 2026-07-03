@@ -19,6 +19,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkersIdRouteImport } from './routes/workers.$id'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedPostJobRouteImport } from './routes/_authenticated/post-job'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -73,6 +74,11 @@ const WorkersIdRoute = WorkersIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => WorkersRoute,
 } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPostJobRoute = AuthenticatedPostJobRouteImport.update({
   id: '/post-job',
   path: '/post-job',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/post-job': typeof AuthenticatedPostJobRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/workers/$id': typeof WorkersIdRoute
   '/jobs/$id': typeof AuthenticatedJobsIdRoute
 }
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/post-job': typeof AuthenticatedPostJobRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/workers/$id': typeof WorkersIdRoute
   '/jobs/$id': typeof AuthenticatedJobsIdRoute
 }
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/post-job': typeof AuthenticatedPostJobRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/workers/$id': typeof WorkersIdRoute
   '/_authenticated/jobs/$id': typeof AuthenticatedJobsIdRoute
 }
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/post-job'
+    | '/profile'
     | '/workers/$id'
     | '/jobs/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/post-job'
+    | '/profile'
     | '/workers/$id'
     | '/jobs/$id'
   id:
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
     | '/_authenticated/post-job'
+    | '/_authenticated/profile'
     | '/workers/$id'
     | '/_authenticated/jobs/$id'
   fileRoutesById: FileRoutesById
@@ -274,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkersIdRouteImport
       parentRoute: typeof WorkersRoute
     }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/post-job': {
       id: '/_authenticated/post-job'
       path: '/post-job'
@@ -309,6 +328,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPostJobRoute: typeof AuthenticatedPostJobRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedJobsIdRoute: typeof AuthenticatedJobsIdRoute
 }
 
@@ -316,6 +336,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPostJobRoute: AuthenticatedPostJobRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedJobsIdRoute: AuthenticatedJobsIdRoute,
 }
 

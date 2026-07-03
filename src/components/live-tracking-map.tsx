@@ -34,6 +34,7 @@ export function LiveTrackingMap({ job }: { job: Job }) {
 
   const [workerLoc, setWorkerLoc] = useState<LatLng>(null);
   const [customerLoc, setCustomerLoc] = useState<LatLng>(null);
+  const [mapReady, setMapReady] = useState(false);
   const [jobDest, setJobDest] = useState<LatLng>(
     job.location_lat != null && job.location_lng != null
       ? { lat: job.location_lat, lng: job.location_lng }
@@ -107,20 +108,20 @@ export function LiveTrackingMap({ job }: { job: Job }) {
   // Init map
   useEffect(() => {
     if (!ready || !mapRef.current || mapObj.current) return;
-    const center = workerLoc ?? dest;
-    if (!center) return;
+    const center = workerLoc ?? dest ?? { lat: 20.5937, lng: 78.9629 };
     mapObj.current = new window.google.maps.Map(mapRef.current, {
       center: { lat: center.lat, lng: center.lng },
-      zoom: 14,
+      zoom: workerLoc || dest ? 14 : 5,
       disableDefaultUI: true,
       zoomControl: true,
       gestureHandling: "greedy",
     });
+    setMapReady(true);
   }, [ready, workerLoc, dest]);
 
   // Destination marker
   useEffect(() => {
-    if (!mapObj.current || !dest) return;
+    if (!mapReady || !mapObj.current || !dest) return;
     if (!destMarker.current) {
       destMarker.current = new window.google.maps.Marker({
         position: dest, map: mapObj.current,
@@ -131,11 +132,11 @@ export function LiveTrackingMap({ job }: { job: Job }) {
       destMarker.current.setPosition(dest);
       destMarker.current.setTitle(customerLoc ? "Customer" : "Job location");
     }
-  }, [dest, customerLoc]);
+  }, [dest, customerLoc, mapReady]);
 
   // Worker marker + route
   useEffect(() => {
-    if (!mapObj.current || !workerLoc) return;
+    if (!mapReady || !mapObj.current || !workerLoc) return;
     const pos = { lat: workerLoc.lat, lng: workerLoc.lng };
     if (!workerMarker.current) {
       workerMarker.current = new window.google.maps.Marker({
