@@ -81,7 +81,6 @@ function Onboarding() {
             {loading ? "Saving…" : "Continue"}
           </Button>
         </div>
-      </main>
     </div>
   );
 }

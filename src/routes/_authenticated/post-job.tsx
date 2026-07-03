@@ -131,7 +131,6 @@ function PostJob() {
             </div>
           </form>
         </div>
-      </main>
     </div>
   );
 }
