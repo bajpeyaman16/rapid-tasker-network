@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      customer_locations: {
+        Row: {
+          accuracy: number | null
+          customer_id: string
+          heading: number | null
+          lat: number
+          lng: number
+          speed: number | null
+          updated_at: string
+        }
+        Insert: {
+          accuracy?: number | null
+          customer_id: string
+          heading?: number | null
+          lat: number
+          lng: number
+          speed?: number | null
+          updated_at?: string
+        }
+        Update: {
+          accuracy?: number | null
+          customer_id?: string
+          heading?: number | null
+          lat?: number
+          lng?: number
+          speed?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       job_offers: {
         Row: {
           created_at: string
