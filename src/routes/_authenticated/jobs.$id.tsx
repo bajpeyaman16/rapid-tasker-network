@@ -344,7 +344,6 @@ function JobDetail() {
             )}
           </aside>
         </div>
-      </main>
     </div>
   );
 }
