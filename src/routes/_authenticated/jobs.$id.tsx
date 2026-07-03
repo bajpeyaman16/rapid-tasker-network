@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { SiteHeader } from "@/components/site-header";
+
 import { JobStatusBadge } from "./dashboard";
 import { recommendWorkersForJob, rankOffers } from "@/lib/recommendations";
 import { LiveTrackingMap } from "@/components/live-tracking-map";
@@ -141,18 +141,11 @@ function JobDetail() {
   }
 
   if (!job) {
-    return (
-      <div className="flex min-h-screen flex-col">
-        <SiteHeader />
-        <div className="container-x flex-1 py-20 text-center text-muted-foreground">Loading job…</div>
-      </div>
-    );
+    return <div className="p-10 text-center text-muted-foreground">Loading job…</div>;
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <SiteHeader />
-      <main className="container-x flex-1 py-8">
+    <div className="p-6">
         <Link to="/dashboard" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-ink"><ArrowLeft className="h-4 w-4" /> Back</Link>
 
         <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_360px]">
