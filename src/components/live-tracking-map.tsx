@@ -11,15 +11,17 @@ type Job = {
   location_lat: number | null;
   location_lng: number | null;
   assigned_worker_id: string | null;
+  customer_id: string | null;
 };
 
-type WorkerLoc = { lat: number; lng: number; updated_at: string } | null;
+type LatLng = { lat: number; lng: number; updated_at?: string } | null;
 
 /**
- * Live map showing:
- *   - worker's current position (realtime updates)
- *   - job destination
- *   - driving route + ETA
+ * Live map:
+ *   - worker's real-time position (from worker_locations)
+ *   - customer's real-time position (from customer_locations), preferred as destination
+ *   - fallback destination: geocoded job address (job.location)
+ *   - driving route worker -> customer + ETA
  */
 export function LiveTrackingMap({ job }: { job: Job }) {
   const { ready, error } = useGoogleMaps();
@@ -28,9 +30,11 @@ export function LiveTrackingMap({ job }: { job: Job }) {
   const workerMarker = useRef<any>(null);
   const destMarker = useRef<any>(null);
   const routeLine = useRef<any>(null);
+  const lastRouteAt = useRef(0);
 
-  const [workerLoc, setWorkerLoc] = useState<WorkerLoc>(null);
-  const [dest, setDest] = useState<{ lat: number; lng: number } | null>(
+  const [workerLoc, setWorkerLoc] = useState<LatLng>(null);
+  const [customerLoc, setCustomerLoc] = useState<LatLng>(null);
+  const [jobDest, setJobDest] = useState<LatLng>(
     job.location_lat != null && job.location_lng != null
       ? { lat: job.location_lat, lng: job.location_lng }
       : null,
@@ -39,15 +43,18 @@ export function LiveTrackingMap({ job }: { job: Job }) {
   const geocode = useServerFn(geocodeJobAddress);
   const routeFn = useServerFn(computeRoute);
 
-  // Geocode destination if we don't have coords yet
-  useEffect(() => {
-    if (dest || !job.location) return;
-    geocode({ data: { jobId: job.id } })
-      .then((r) => setDest({ lat: r.lat, lng: r.lng }))
-      .catch(() => {});
-  }, [dest, job.id, job.location, geocode]);
+  // Destination = customer live location if we have it, else job address
+  const dest: LatLng = customerLoc ?? jobDest;
 
-  // Initial worker location + realtime subscription
+  // Geocode fallback job address once
+  useEffect(() => {
+    if (jobDest || !job.location) return;
+    geocode({ data: { jobId: job.id } })
+      .then((r) => setJobDest({ lat: r.lat, lng: r.lng }))
+      .catch(() => {});
+  }, [jobDest, job.id, job.location, geocode]);
+
+  // Worker realtime
   useEffect(() => {
     if (!job.assigned_worker_id) return;
     let mounted = true;
@@ -56,15 +63,15 @@ export function LiveTrackingMap({ job }: { job: Job }) {
       .select("lat,lng,updated_at")
       .eq("worker_id", job.assigned_worker_id)
       .maybeSingle()
-      .then(({ data }) => { if (mounted && data) setWorkerLoc(data as WorkerLoc); });
+      .then(({ data }) => { if (mounted && data) setWorkerLoc(data as LatLng); });
 
     const channel = supabase
-      .channel(`worker-loc-${job.assigned_worker_id}`)
+      .channel(`wloc-${job.assigned_worker_id}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "worker_locations", filter: `worker_id=eq.${job.assigned_worker_id}` },
         (payload: any) => {
-          const row = (payload.new ?? payload.record) as WorkerLoc;
+          const row = (payload.new ?? payload.record) as LatLng;
           if (row) setWorkerLoc(row);
         },
       )
@@ -72,7 +79,32 @@ export function LiveTrackingMap({ job }: { job: Job }) {
     return () => { mounted = false; supabase.removeChannel(channel); };
   }, [job.assigned_worker_id]);
 
-  // Init map when script is ready and we have at least one point
+  // Customer realtime
+  useEffect(() => {
+    if (!job.customer_id) return;
+    let mounted = true;
+    supabase
+      .from("customer_locations")
+      .select("lat,lng,updated_at")
+      .eq("customer_id", job.customer_id)
+      .maybeSingle()
+      .then(({ data }) => { if (mounted && data) setCustomerLoc(data as LatLng); });
+
+    const channel = supabase
+      .channel(`cloc-${job.customer_id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "customer_locations", filter: `customer_id=eq.${job.customer_id}` },
+        (payload: any) => {
+          const row = (payload.new ?? payload.record) as LatLng;
+          if (row) setCustomerLoc(row);
+        },
+      )
+      .subscribe();
+    return () => { mounted = false; supabase.removeChannel(channel); };
+  }, [job.customer_id]);
+
+  // Init map
   useEffect(() => {
     if (!ready || !mapRef.current || mapObj.current) return;
     const center = workerLoc ?? dest;
@@ -86,20 +118,22 @@ export function LiveTrackingMap({ job }: { job: Job }) {
     });
   }, [ready, workerLoc, dest]);
 
-  // Update destination marker
+  // Destination marker
   useEffect(() => {
     if (!mapObj.current || !dest) return;
     if (!destMarker.current) {
       destMarker.current = new window.google.maps.Marker({
-        position: dest, map: mapObj.current, title: "Job location",
+        position: dest, map: mapObj.current,
+        title: customerLoc ? "Customer" : "Job location",
         icon: { path: window.google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: "#ef4444", fillOpacity: 1, strokeColor: "#fff", strokeWeight: 2 },
       });
     } else {
       destMarker.current.setPosition(dest);
+      destMarker.current.setTitle(customerLoc ? "Customer" : "Job location");
     }
-  }, [dest]);
+  }, [dest, customerLoc]);
 
-  // Update worker marker + route
+  // Worker marker + route
   useEffect(() => {
     if (!mapObj.current || !workerLoc) return;
     const pos = { lat: workerLoc.lat, lng: workerLoc.lng };
@@ -112,13 +146,16 @@ export function LiveTrackingMap({ job }: { job: Job }) {
       workerMarker.current.setPosition(pos);
     }
 
-    // Fit both markers
     if (dest) {
       const bounds = new window.google.maps.LatLngBounds();
       bounds.extend(pos); bounds.extend(dest);
       mapObj.current.fitBounds(bounds, 80);
 
-      // Fetch route (throttled — only refresh every ~30s or when worker moves a lot)
+      // throttle route recompute to once per ~25s
+      const now = Date.now();
+      if (now - lastRouteAt.current < 25000) return;
+      lastRouteAt.current = now;
+
       routeFn({ data: { originLat: pos.lat, originLng: pos.lng, destLat: dest.lat, destLng: dest.lng } })
         .then((r) => {
           setEta({ mins: Math.max(1, Math.round(r.durationSeconds / 60)), km: +(r.distanceMeters / 1000).toFixed(1) });
@@ -146,7 +183,9 @@ export function LiveTrackingMap({ job }: { job: Job }) {
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Navigation className="h-4 w-4 text-primary" />
-          <h3 className="font-display text-sm font-semibold text-ink">Live tracking</h3>
+          <h3 className="font-display text-sm font-semibold text-ink">
+            Live tracking {customerLoc ? "· using customer's live location" : ""}
+          </h3>
         </div>
         {eta ? (
           <span className="text-xs text-muted-foreground">
@@ -155,7 +194,7 @@ export function LiveTrackingMap({ job }: { job: Job }) {
         ) : workerLoc ? (
           <span className="text-xs text-muted-foreground">Locating…</span>
         ) : (
-          <span className="text-xs text-muted-foreground">Waiting for worker to share location…</span>
+          <span className="text-xs text-muted-foreground">Waiting for worker's location…</span>
         )}
       </div>
       <div ref={mapRef} className="h-[360px] w-full overflow-hidden rounded-xl bg-secondary">
@@ -165,11 +204,10 @@ export function LiveTrackingMap({ job }: { job: Job }) {
           </div>
         )}
       </div>
-      {workerLoc && (
-        <p className="mt-2 text-[11px] text-muted-foreground">
-          Last update: {new Date(workerLoc.updated_at).toLocaleTimeString()}
-        </p>
-      )}
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground">
+        {workerLoc && <span>Worker updated: {new Date(workerLoc.updated_at ?? "").toLocaleTimeString()}</span>}
+        {customerLoc && <span>Customer updated: {new Date(customerLoc.updated_at ?? "").toLocaleTimeString()}</span>}
+      </div>
     </div>
   );
 }

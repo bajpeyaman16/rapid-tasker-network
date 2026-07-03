@@ -205,6 +205,7 @@ function JobDetail() {
                 location_lat: job.location_lat,
                 location_lng: job.location_lng,
                 assigned_worker_id: job.assigned_worker_id,
+                customer_id: job.customer_id,
               }} />
             )}
 
