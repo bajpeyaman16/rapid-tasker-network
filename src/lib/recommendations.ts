@@ -183,7 +183,7 @@ export async function rankOffers(
   if (!ids.length) return [];
   const [{ data: workers }, { data: profiles }] = await Promise.all([
     supabase.from("worker_profiles").select("*").in("id", ids),
-    supabase.from("profiles").select("id, full_name, avatar_url, city").in("id", ids),
+    supabase.from("public_profiles").select("id, full_name, avatar_url, city").in("id", ids),
   ]);
   const wmap = new Map((workers ?? []).map((w) => [w.id, w as WorkerLike]));
   const pmap = new Map((profiles ?? []).map((p) => [p.id, p]));
