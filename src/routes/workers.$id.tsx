@@ -117,7 +117,7 @@ function WorkerProfile() {
                   <div className="mt-4 space-y-2">
                     <Button asChild className="w-full"><Link to="/post-job">Hire / Request quote</Link></Button>
                     <div className="grid grid-cols-2 gap-2">
-                      <Button variant="outline" disabled={!w.profile?.phone}><Phone className="h-4 w-4" /> Call</Button>
+                      <Button variant="outline" disabled><Phone className="h-4 w-4" /> Call</Button>
                       <Button variant="outline"><MessageSquare className="h-4 w-4" /> Chat</Button>
                     </div>
                   </div>
