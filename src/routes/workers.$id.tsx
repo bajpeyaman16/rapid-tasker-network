@@ -146,11 +146,32 @@ function WorkerProfile() {
                     </div>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-border bg-card p-5 text-sm">
-                  <p className="font-display font-semibold text-ink">Completed jobs</p>
-                  <p className="mt-1 text-2xl font-bold text-ink">{w.completed_jobs ?? 0}</p>
-                </div>
               </aside>
+
+              <section className="rounded-2xl border border-border bg-card p-5 lg:col-span-2">
+                <div className="mb-3 flex items-center justify-between">
+                  <div>
+                    <h2 className="font-display text-base font-semibold text-ink inline-flex items-center gap-2"><Navigation className="h-4 w-4 text-primary" /> Live location</h2>
+                    <p className="text-xs text-muted-foreground">Real-time worker location is shared only during an active job you booked with them.</p>
+                  </div>
+                  {activeJob && (
+                    <Button asChild size="sm" variant="outline">
+                      <Link to="/jobs/$id" params={{ id: activeJob.id }}>Open job</Link>
+                    </Button>
+                  )}
+                </div>
+                {activeJob ? (
+                  <LiveTrackingMap job={activeJob as any} />
+                ) : (
+                  <div className="rounded-xl border border-dashed border-border bg-background/60 p-6 text-center text-sm text-muted-foreground">
+                    <MapPin className="mx-auto mb-2 h-5 w-5 text-muted-foreground" />
+                    Live tracking will appear here once you hire this worker and the job is accepted.
+                    <div className="mt-3">
+                      <Button asChild size="sm"><Link to="/post-job">Hire this worker</Link></Button>
+                    </div>
+                  </div>
+                )}
+              </section>
             </div>
           )}
         </div>
