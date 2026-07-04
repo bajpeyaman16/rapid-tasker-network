@@ -8,6 +8,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { LiveTrackingMap } from "@/components/live-tracking-map";
+import { WorkerLocationShare } from "@/components/worker-location-share";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -157,6 +159,23 @@ function WorkerView({ userId }: { userId: string }) {
     },
   });
 
+  const { data: activeJob } = useQuery({
+    queryKey: ["worker-active-job", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("id, title, location, location_lat, location_lng, status, assigned_worker_id, customer_id")
+        .eq("assigned_worker_id", userId)
+        .in("status", ["accepted", "on_the_way", "started", "in_progress"])
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: 15000,
+  });
+
   return (
     <>
       <PageHead title="Worker dashboard" subtitle="Find nearby jobs and grow your reputation." action={
@@ -179,7 +198,24 @@ function WorkerView({ userId }: { userId: string }) {
         <StatCard icon={Star} label="Open jobs nearby" value={openJobs?.length ?? 0} />
       </div>
 
+      {activeJob && (
+        <section className="mt-8">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <SectionTitle title="Active job — navigate to customer" />
+              <p className="mt-0.5 truncate text-sm text-muted-foreground">{activeJob.title} · {activeJob.location}</p>
+            </div>
+            <Button asChild size="sm" variant="outline"><Link to="/jobs/$id" params={{ id: activeJob.id }}>Open job</Link></Button>
+          </div>
+          <LiveTrackingMap job={activeJob as any} />
+          <div className="mt-3 max-w-sm">
+            <WorkerLocationShare jobId={activeJob.id} workerId={userId} />
+          </div>
+        </section>
+      )}
+
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
+
         <section>
           <SectionTitle title="Open jobs nearby" />
           {openJobs && openJobs.length === 0 ? (
