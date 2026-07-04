@@ -32,7 +32,7 @@ function Workers() {
       if (error) throw error;
       const ids = (ws ?? []).map((w) => w.id);
       const profiles = ids.length
-        ? (await supabase.from("profiles").select("id, full_name, avatar_url, city, phone").in("id", ids)).data ?? []
+        ? (await supabase.from("public_profiles").select("id, full_name, avatar_url, city").in("id", ids)).data ?? []
         : [];
       const pmap = new Map(profiles.map((p) => [p.id, p]));
       let list = (ws ?? []).map((w) => ({ ...w, profile: pmap.get(w.id) ?? null }));
@@ -121,10 +121,7 @@ function Workers() {
                     )}
                   </div>
 
-                  <div className="pointer-events-auto relative z-10 mt-4 grid grid-cols-3 gap-2">
-                    <Button asChild size="sm" variant="outline" disabled={!w.profile?.phone}>
-                      <a href={w.profile?.phone ? `tel:${w.profile.phone}` : "#"} onClick={(e) => e.stopPropagation()}><Phone className="h-3.5 w-3.5" /></a>
-                    </Button>
+                  <div className="pointer-events-auto relative z-10 mt-4 grid grid-cols-2 gap-2">
                     <Button asChild size="sm" variant="outline">
                       <Link to="/workers/$id" params={{ id: w.id }} onClick={(e) => e.stopPropagation()}><MessageSquare className="h-3.5 w-3.5" /></Link>
                     </Button>

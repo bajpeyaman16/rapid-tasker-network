@@ -19,7 +19,7 @@ function WorkerProfile() {
       const { data: wp, error } = await supabase.from("worker_profiles").select("*").eq("id", id).maybeSingle();
       if (error) throw error;
       if (!wp) return null;
-      const { data: prof } = await supabase.from("profiles").select("full_name, avatar_url, city, phone").eq("id", id).maybeSingle();
+      const { data: prof } = await supabase.from("public_profiles").select("full_name, avatar_url, city").eq("id", id).maybeSingle();
       return { ...wp, profile: prof };
     },
   });
@@ -117,7 +117,7 @@ function WorkerProfile() {
                   <div className="mt-4 space-y-2">
                     <Button asChild className="w-full"><Link to="/post-job">Hire / Request quote</Link></Button>
                     <div className="grid grid-cols-2 gap-2">
-                      <Button variant="outline" disabled={!w.profile?.phone}><Phone className="h-4 w-4" /> Call</Button>
+                      <Button variant="outline" disabled><Phone className="h-4 w-4" /> Call</Button>
                       <Button variant="outline"><MessageSquare className="h-4 w-4" /> Chat</Button>
                     </div>
                   </div>
