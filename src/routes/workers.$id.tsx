@@ -19,7 +19,7 @@ function WorkerProfile() {
       const { data: wp, error } = await supabase.from("worker_profiles").select("*").eq("id", id).maybeSingle();
       if (error) throw error;
       if (!wp) return null;
-      const { data: prof } = await supabase.from("profiles").select("full_name, avatar_url, city, phone").eq("id", id).maybeSingle();
+      const { data: prof } = await supabase.from("public_profiles").select("full_name, avatar_url, city").eq("id", id).maybeSingle();
       return { ...wp, profile: prof };
     },
   });
