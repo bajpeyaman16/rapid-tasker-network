@@ -89,34 +89,48 @@ function Workers() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {workers?.map((w) => (
-                <article key={w.id} className="rounded-2xl border border-border bg-card p-5">
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-primary-soft text-primary font-display text-lg font-bold">
-                      {(w.profile?.full_name ?? "?").slice(0,1).toUpperCase()}
+                <article key={w.id} className="group relative rounded-2xl border border-border bg-card p-5 transition-all hover:border-primary/40 hover:shadow-sm">
+                  <Link
+                    to="/workers/$id"
+                    params={{ id: w.id }}
+                    aria-label={`View ${w.profile?.full_name ?? "worker"} profile`}
+                    className="absolute inset-0 z-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  />
+                  <div className="pointer-events-none relative z-10">
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-primary-soft text-primary font-display text-lg font-bold">
+                        {(w.profile?.full_name ?? "?").slice(0,1).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="truncate font-display font-semibold text-ink group-hover:text-primary">{w.profile?.full_name ?? "Worker"}</h3>
+                        <p className="truncate text-xs text-muted-foreground">{w.headline ?? (w.categories?.[0] ?? "Local pro")}</p>
+                      </div>
+                      {w.is_verified && <ShieldCheck className="ml-auto h-4 w-4 text-primary" />}
                     </div>
-                    <div className="min-w-0">
-                      <h3 className="truncate font-display font-semibold text-ink">{w.profile?.full_name ?? "Worker"}</h3>
-                      <p className="truncate text-xs text-muted-foreground">{w.headline ?? (w.categories?.[0] ?? "Local pro")}</p>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1"><Star className="h-3 w-3 fill-warning text-warning" /> {Number(w.rating ?? 0).toFixed(1)} ({w.reviews_count ?? 0})</span>
+                      <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {w.city ?? w.profile?.city ?? "—"}</span>
+                      {w.hourly_rate && <span className="font-semibold text-ink">₹{w.hourly_rate}/hr</span>}
                     </div>
-                    {w.is_verified && <ShieldCheck className="ml-auto h-4 w-4 text-primary" />}
+
+                    {w.categories?.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {w.categories.slice(0,3).map((c: string) => <Badge key={c} variant="outline" className="text-[10px]">{c}</Badge>)}
+                      </div>
+                    )}
                   </div>
 
-                  <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1"><Star className="h-3 w-3 fill-warning text-warning" /> {Number(w.rating ?? 0).toFixed(1)} ({w.reviews_count ?? 0})</span>
-                    <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {w.city ?? w.profile?.city ?? "—"}</span>
-                    {w.hourly_rate && <span className="font-semibold text-ink">₹{w.hourly_rate}/hr</span>}
-                  </div>
-
-                  {w.categories?.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {w.categories.slice(0,3).map((c: string) => <Badge key={c} variant="outline" className="text-[10px]">{c}</Badge>)}
-                    </div>
-                  )}
-
-                  <div className="mt-4 grid grid-cols-3 gap-2">
-                    <Button size="sm" variant="outline" disabled={!w.profile?.phone}><Phone className="h-3.5 w-3.5" /></Button>
-                    <Button size="sm" variant="outline"><MessageSquare className="h-3.5 w-3.5" /></Button>
-                    <Button asChild size="sm"><Link to="/workers/$id" params={{ id: w.id }}>View</Link></Button>
+                  <div className="pointer-events-auto relative z-10 mt-4 grid grid-cols-3 gap-2">
+                    <Button asChild size="sm" variant="outline" disabled={!w.profile?.phone}>
+                      <a href={w.profile?.phone ? `tel:${w.profile.phone}` : "#"} onClick={(e) => e.stopPropagation()}><Phone className="h-3.5 w-3.5" /></a>
+                    </Button>
+                    <Button asChild size="sm" variant="outline">
+                      <Link to="/workers/$id" params={{ id: w.id }} onClick={(e) => e.stopPropagation()}><MessageSquare className="h-3.5 w-3.5" /></Link>
+                    </Button>
+                    <Button asChild size="sm">
+                      <Link to="/workers/$id" params={{ id: w.id }} onClick={(e) => e.stopPropagation()}>View</Link>
+                    </Button>
                   </div>
                 </article>
               ))}
