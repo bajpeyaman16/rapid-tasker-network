@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Star, ShieldCheck, Phone, MessageSquare, Briefcase, ArrowLeft } from "lucide-react";
+import { MapPin, Star, ShieldCheck, Phone, MessageSquare, Briefcase, ArrowLeft, Navigation } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { LiveTrackingMap } from "@/components/live-tracking-map";
 
 export const Route = createFileRoute("/workers/$id")({
   component: WorkerProfile,
@@ -13,6 +15,9 @@ export const Route = createFileRoute("/workers/$id")({
 
 function WorkerProfile() {
   const { id } = useParams({ from: "/workers/$id" });
+  const [userId, setUserId] = useState<string | null>(null);
+  useEffect(() => { supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null)); }, []);
+
   const { data: w } = useQuery({
     queryKey: ["worker", id],
     queryFn: async () => {
