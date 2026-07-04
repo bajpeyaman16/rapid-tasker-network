@@ -38,6 +38,25 @@ function WorkerProfile() {
     },
   });
 
+  // Active job between the current customer and this worker — enables live tracking.
+  const { data: activeJob } = useQuery({
+    queryKey: ["worker-active-job", id, userId],
+    enabled: !!userId,
+    refetchInterval: 15000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("jobs")
+        .select("id, location, location_lat, location_lng, assigned_worker_id, customer_id, title, status")
+        .eq("assigned_worker_id", id)
+        .eq("customer_id", userId!)
+        .in("status", ["accepted", "on_the_way", "started", "in_progress"])
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
