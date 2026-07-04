@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { MapPin, Star, ShieldCheck, Phone, MessageSquare, Briefcase, ArrowLeft } from "lucide-react";
+import { MapPin, Star, ShieldCheck, Phone, MessageSquare, Briefcase, ArrowLeft, Navigation } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { LiveTrackingMap } from "@/components/live-tracking-map";
 
 export const Route = createFileRoute("/workers/$id")({
   component: WorkerProfile,
@@ -13,6 +15,9 @@ export const Route = createFileRoute("/workers/$id")({
 
 function WorkerProfile() {
   const { id } = useParams({ from: "/workers/$id" });
+  const [userId, setUserId] = useState<string | null>(null);
+  useEffect(() => { supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null)); }, []);
+
   const { data: w } = useQuery({
     queryKey: ["worker", id],
     queryFn: async () => {
@@ -30,6 +35,25 @@ function WorkerProfile() {
       const { data, error } = await supabase.from("reviews").select("*").eq("worker_id", id).order("created_at", { ascending: false }).limit(20);
       if (error) throw error;
       return data ?? [];
+    },
+  });
+
+  // Active job between the current customer and this worker — enables live tracking.
+  const { data: activeJob } = useQuery({
+    queryKey: ["worker-active-job", id, userId],
+    enabled: !!userId,
+    refetchInterval: 15000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("jobs")
+        .select("id, location, location_lat, location_lng, assigned_worker_id, customer_id, title, status")
+        .eq("assigned_worker_id", id)
+        .eq("customer_id", userId!)
+        .in("status", ["accepted", "on_the_way", "started", "in_progress"])
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data;
     },
   });
 
@@ -127,6 +151,31 @@ function WorkerProfile() {
                   <p className="mt-1 text-2xl font-bold text-ink">{w.completed_jobs ?? 0}</p>
                 </div>
               </aside>
+
+              <section className="rounded-2xl border border-border bg-card p-5 lg:col-span-2">
+                <div className="mb-3 flex items-center justify-between">
+                  <div>
+                    <h2 className="font-display text-base font-semibold text-ink inline-flex items-center gap-2"><Navigation className="h-4 w-4 text-primary" /> Live location</h2>
+                    <p className="text-xs text-muted-foreground">Real-time worker location is shared only during an active job you booked with them.</p>
+                  </div>
+                  {activeJob && (
+                    <Button asChild size="sm" variant="outline">
+                      <Link to="/jobs/$id" params={{ id: activeJob.id }}>Open job</Link>
+                    </Button>
+                  )}
+                </div>
+                {activeJob ? (
+                  <LiveTrackingMap job={activeJob as any} />
+                ) : (
+                  <div className="rounded-xl border border-dashed border-border bg-background/60 p-6 text-center text-sm text-muted-foreground">
+                    <MapPin className="mx-auto mb-2 h-5 w-5 text-muted-foreground" />
+                    Live tracking will appear here once you hire this worker and the job is accepted.
+                    <div className="mt-3">
+                      <Button asChild size="sm"><Link to="/post-job">Hire this worker</Link></Button>
+                    </div>
+                  </div>
+                )}
+              </section>
             </div>
           )}
         </div>
