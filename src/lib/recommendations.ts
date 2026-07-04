@@ -186,7 +186,7 @@ export async function rankOffers(
     supabase.from("public_profiles").select("id, full_name, avatar_url, city").in("id", ids),
   ]);
   const wmap = new Map((workers ?? []).map((w) => [w.id, w as WorkerLike]));
-  const pmap = new Map((profiles ?? []).map((p) => [p.id, p]));
+  const pmap = new Map((profiles ?? []).filter((p): p is { id: string; full_name: string | null; avatar_url: string | null; city: string | null } => !!p.id).map((p) => [p.id, p]));
 
   return offers
     .map((o) => {
