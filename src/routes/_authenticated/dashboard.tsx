@@ -159,6 +159,23 @@ function WorkerView({ userId }: { userId: string }) {
     },
   });
 
+  const { data: activeJob } = useQuery({
+    queryKey: ["worker-active-job", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("id, title, location, location_lat, location_lng, status, assigned_worker_id, customer_id")
+        .eq("assigned_worker_id", userId)
+        .in("status", ["accepted", "on_the_way", "started", "in_progress"])
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: 15000,
+  });
+
   return (
     <>
       <PageHead title="Worker dashboard" subtitle="Find nearby jobs and grow your reputation." action={
