@@ -198,7 +198,24 @@ function WorkerView({ userId }: { userId: string }) {
         <StatCard icon={Star} label="Open jobs nearby" value={openJobs?.length ?? 0} />
       </div>
 
+      {activeJob && (
+        <section className="mt-8">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <SectionTitle title="Active job — navigate to customer" />
+              <p className="mt-0.5 truncate text-sm text-muted-foreground">{activeJob.title} · {activeJob.location}</p>
+            </div>
+            <Button asChild size="sm" variant="outline"><Link to="/jobs/$id" params={{ id: activeJob.id }}>Open job</Link></Button>
+          </div>
+          <LiveTrackingMap job={activeJob as any} />
+          <div className="mt-3 max-w-sm">
+            <WorkerLocationShare jobId={activeJob.id} workerId={userId} />
+          </div>
+        </section>
+      )}
+
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
+
         <section>
           <SectionTitle title="Open jobs nearby" />
           {openJobs && openJobs.length === 0 ? (
