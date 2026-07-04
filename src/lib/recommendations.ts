@@ -155,7 +155,7 @@ export async function recommendWorkersForJob(job: JobLike & { id?: string }, lim
 
   const ids = eligible.map((w) => w.id);
   const profiles = ids.length
-    ? (await supabase.from("profiles").select("id, full_name, avatar_url, city").in("id", ids)).data ?? []
+    ? (await supabase.from("public_profiles").select("id, full_name, avatar_url, city").in("id", ids)).data ?? []
     : [];
   const pmap = new Map(profiles.map((p) => [p.id, p]));
 
