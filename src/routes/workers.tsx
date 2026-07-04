@@ -121,10 +121,7 @@ function Workers() {
                     )}
                   </div>
 
-                  <div className="pointer-events-auto relative z-10 mt-4 grid grid-cols-3 gap-2">
-                    <Button asChild size="sm" variant="outline" disabled={!w.profile?.phone}>
-                      <a href={w.profile?.phone ? `tel:${w.profile.phone}` : "#"} onClick={(e) => e.stopPropagation()}><Phone className="h-3.5 w-3.5" /></a>
-                    </Button>
+                  <div className="pointer-events-auto relative z-10 mt-4 grid grid-cols-2 gap-2">
                     <Button asChild size="sm" variant="outline">
                       <Link to="/workers/$id" params={{ id: w.id }} onClick={(e) => e.stopPropagation()}><MessageSquare className="h-3.5 w-3.5" /></Link>
                     </Button>
