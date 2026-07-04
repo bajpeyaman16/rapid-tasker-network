@@ -146,6 +146,10 @@ function WorkerProfile() {
                     </div>
                   </div>
                 </div>
+                <div className="rounded-2xl border border-border bg-card p-5 text-sm">
+                  <p className="font-display font-semibold text-ink">Completed jobs</p>
+                  <p className="mt-1 text-2xl font-bold text-ink">{w.completed_jobs ?? 0}</p>
+                </div>
               </aside>
 
               <section className="rounded-2xl border border-border bg-card p-5 lg:col-span-2">
