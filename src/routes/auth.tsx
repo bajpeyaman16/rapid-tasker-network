@@ -17,7 +17,14 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
-  head: () => ({ meta: [{ title: "Sign in — Local Work Network" }] }),
+  head: () => ({ meta: [
+    { title: "Sign in or create an account — Local Work Network" },
+    { name: "description", content: "Sign in or create your Local Work Network account to find local work or hire nearby professionals." },
+    { property: "og:title", content: "Sign in or create an account — Local Work Network" },
+    { property: "og:description", content: "Sign in or create your Local Work Network account to find local work or hire nearby professionals." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: AuthPage,
 });
 
@@ -29,18 +36,24 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [notice, setNotice] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setNotice(null);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email, password,
           options: { emailRedirectTo: window.location.origin, data: { full_name: fullName } },
         });
         if (error) throw error;
-        toast.success("Welcome! Let's set up your account.");
+        if (!data.session) {
+          setNotice("Check your email for a confirmation link. After confirming, sign in to finish setting up your account.");
+          return;
+        }
+        toast.success("Account created. Let's set it up.");
         navigate({ to: "/onboarding", search: { role: search.role ?? "customer" } });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -49,7 +62,10 @@ function AuthPage() {
         navigate({ to: "/dashboard" });
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Authentication failed");
+      const message = err instanceof TypeError && /fetch/i.test(err.message)
+        ? "We couldn't reach sign-in right now. Check your connection and try again."
+        : err instanceof Error ? err.message : "Sign-in didn't work. Please try again.";
+      setNotice(message);
     } finally {
       setLoading(false);
     }
@@ -57,11 +73,21 @@ function AuthPage() {
 
   async function google() {
     setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (result.error) { toast.error(result.error.message); setLoading(false); return; }
-    if (result.redirected) return;
-    toast.success("Signed in");
-    navigate({ to: "/dashboard" });
+    setNotice(null);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+      if (result.error) throw result.error;
+      if (result.redirected) return;
+      toast.success("Signed in");
+      navigate({ to: "/dashboard" });
+    } catch (err) {
+      const message = err instanceof TypeError && /fetch/i.test(err.message)
+        ? "We couldn't reach sign-in right now. Check your connection and try again."
+        : err instanceof Error ? err.message : "Google sign-in didn't work. Please try again.";
+      setNotice(message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -81,7 +107,7 @@ function AuthPage() {
             </p>
           </div>
 
-          <div className="mt-7 rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <div className="mt-7 rounded-lg border border-border bg-card p-6 shadow-sm">
             <Button onClick={google} variant="outline" className="w-full" disabled={loading}>
               <svg viewBox="0 0 24 24" className="h-4 w-4"><path fill="#EA4335" d="M12 11v3.2h5.4c-.2 1.4-1.7 4-5.4 4-3.2 0-5.9-2.7-5.9-6s2.7-6 5.9-6c1.8 0 3.1.8 3.8 1.4l2.6-2.5C16.7 3.6 14.6 2.7 12 2.7 6.8 2.7 2.7 6.9 2.7 12s4.2 9.3 9.3 9.3c5.4 0 8.9-3.8 8.9-9.1 0-.6-.1-1.1-.2-1.6H12z"/></svg>
               Continue with Google
@@ -107,11 +133,12 @@ function AuthPage() {
                 {loading ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
               </Button>
             </form>
+            {notice && <p role="alert" className="mt-4 rounded-md border border-border bg-muted px-3 py-2 text-sm text-foreground">{notice}</p>}
           </div>
 
           <p className="mt-5 text-center text-sm text-muted-foreground">
             {mode === "signup" ? "Already have an account? " : "New here? "}
-            <button onClick={() => setMode(mode === "signup" ? "signin" : "signup")} className="font-semibold text-primary hover:underline">
+            <button onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setNotice(null); }} className="font-semibold text-primary hover:underline">
               {mode === "signup" ? "Sign in" : "Create one"}
             </button>
           </p>

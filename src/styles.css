@@ -39,6 +39,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ink: var(--ink);
+  --color-hero-foreground: var(--hero-foreground);
 }
 
 :root {
@@ -79,6 +80,8 @@
   --border: oklch(0.92 0.01 240);
   --input: oklch(0.92 0.01 240);
   --ring: oklch(0.65 0.16 158);
+  --hero-foreground: oklch(0.99 0 0);
+  --hero-shade: oklch(0.16 0.05 255 / 70%);
 }
 
 .dark {
@@ -102,6 +105,15 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.72 0.16 158);
+  --hero-foreground: oklch(0.99 0 0);
+  --hero-shade: oklch(0.16 0.05 255 / 76%);
+}
+
+.home-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--hero-shade);
 }
 
 @layer base {

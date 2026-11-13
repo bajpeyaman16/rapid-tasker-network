@@ -1,24 +1,22 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  Search, MapPin, Star, ShieldCheck, Bolt, ArrowRight, Phone, MessageSquare,
-  ClipboardList, Users, CheckCircle2, Sparkles,
-} from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { Search, MapPin, ShieldCheck, ArrowRight, ClipboardList, Users, CheckCircle2, BriefcaseBusiness, UserRound, Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
 import { CATEGORIES } from "@/lib/categories";
+import { SiteFooter } from "@/components/site-footer";
 import heroImg from "@/assets/hero-worker.jpg";
-import workerCleaner from "@/assets/worker-cleaner.jpg";
-import workerPlumber from "@/assets/worker-plumber.jpg";
-import workerCarpenter from "@/assets/worker-carpenter.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Local Work Network — Find Work. Find Workers. Instantly." },
-      { name: "description", content: "Verified local workers near you. Post a job, get instant offers from nearby professionals." },
+      { title: "Local Work Network | Find trusted local workers" },
+      { name: "description", content: "Find local workers for home services, or post a job and receive offers from professionals nearby." },
+      { property: "og:title", content: "Local Work Network | Find trusted local workers" },
+      { property: "og:description", content: "Find local workers for home services, or post a job and receive offers from professionals nearby." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: HomePage,
@@ -32,11 +30,7 @@ function HomePage() {
         <Hero />
         <CategoryGrid />
         <HowItWorks />
-        <FeaturedWorkers />
-        <EmergencyBanner />
-        <Stats />
-        <Testimonials />
-        <CTA />
+        <CommunitySection />
       </main>
       <SiteFooter />
     </div>
@@ -44,64 +38,42 @@ function HomePage() {
 }
 
 function Hero() {
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+
   return (
-    <section className="relative overflow-hidden">
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary-soft via-background to-accent-soft" />
-      <div className="container-x grid items-center gap-10 py-14 md:grid-cols-2 md:py-20">
-        <div>
-          <Badge variant="secondary" className="rounded-full border border-primary/20 bg-white px-3 py-1 text-xs font-medium text-primary">
-            <ShieldCheck className="mr-1 h-3.5 w-3.5" /> Verified local workers
-          </Badge>
-          <h1 className="mt-5 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl md:text-6xl">
-            Find Work. <br />
-            <span className="text-primary">Find Workers.</span>{" "}
-            <span className="text-accent">Instantly.</span>
-          </h1>
-          <p className="mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
-            Post a job and get instant offers from nearby verified professionals — electricians,
-            plumbers, cleaners, carpenters and more.
+    <section className="home-hero relative isolate flex min-h-[590px] items-end overflow-hidden bg-ink md:min-h-[660px]">
+      <img src={heroImg} alt="Local tradesperson ready for a home service job" width={1280} height={1280} fetchPriority="high" className="absolute inset-0 -z-10 h-full w-full object-cover object-[center_42%]" />
+      <div className="container-x relative z-10 w-full pb-12 pt-16 md:pb-16">
+        <div className="max-w-3xl">
+          <p className="inline-flex items-center gap-2 text-sm font-semibold text-hero-foreground/90">
+            <MapPin className="h-4 w-4" /> Local Work Network
           </p>
-
-          <div className="mt-7 rounded-2xl border border-border bg-card p-3 shadow-sm">
-            <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
-              <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3">
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <Input placeholder="What service? e.g. Plumber" className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0" />
-              </div>
-              <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Your city or area" className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0" />
-              </div>
-              <Button asChild size="lg" className="h-11">
-                <Link to="/workers">Search</Link>
-              </Button>
+          <h1 className="mt-4 max-w-2xl font-display text-4xl font-bold leading-tight text-hero-foreground sm:text-5xl md:text-6xl">
+            Find trusted help nearby.
+          </h1>
+          <p className="mt-4 max-w-xl text-base leading-relaxed text-hero-foreground/90 sm:text-lg">
+            From a leaking tap to a fresh coat of paint, connect with local professionals — or find your next job close to home.
+          </p>
+          <form className="mt-7 flex max-w-2xl flex-col gap-2 rounded-md border border-border bg-background p-2 shadow-lg sm:flex-row" onSubmit={(event) => {
+            event.preventDefault();
+            navigate({ to: "/workers", search: query.trim() ? { q: query.trim() } : {} });
+          }}>
+            <div className="flex min-w-0 flex-1 items-center gap-2 px-2">
+              <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
+              <Input aria-label="Service or skill" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="What do you need help with?" className="border-0 bg-transparent shadow-none focus-visible:ring-0" />
             </div>
-          </div>
-
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <Button asChild variant="outline" size="lg">
-              <Link to="/dashboard"><ClipboardList className="h-4 w-4" /> Post a Job</Link>
+            <Button type="submit" size="lg" className="h-11 shrink-0">
+              Find workers <ArrowRight className="h-4 w-4" />
             </Button>
-            <p className="text-sm text-muted-foreground">
-              Free to post · Workers reply in minutes
-            </p>
-          </div>
-        </div>
-
-        <div className="relative">
-          <div className="absolute -inset-4 -z-10 rounded-[2rem] brand-gradient opacity-15 blur-2xl" />
-          <div className="relative overflow-hidden rounded-[2rem] border border-border bg-card shadow-xl">
-            <img src={heroImg} alt="Verified local worker" width={1280} height={1280} className="aspect-square w-full object-cover" />
-            <div className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-ink shadow">
-              <span className="mr-1 inline-block h-2 w-2 rounded-full bg-success animate-pulse" /> 248 workers online nearby
-            </div>
-            <div className="absolute bottom-4 right-4 rounded-2xl bg-white p-3 shadow-lg">
-              <div className="flex items-center gap-2 text-xs font-medium">
-                <Star className="h-4 w-4 fill-warning text-warning" />
-                <span>4.9 average rating</span>
-              </div>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">across 12,400+ jobs</p>
-            </div>
+          </form>
+          <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-hero-foreground/90">
+            <Link to="/auth" search={{ mode: "signup", role: "customer" }} className="inline-flex items-center gap-2 font-semibold underline decoration-hero-foreground/50 underline-offset-4 hover:decoration-hero-foreground">
+              <ClipboardList className="h-4 w-4" /> Post a job
+            </Link>
+            <Link to="/auth" search={{ mode: "signup", role: "worker" }} className="inline-flex items-center gap-2 font-semibold underline decoration-hero-foreground/50 underline-offset-4 hover:decoration-hero-foreground">
+              <BriefcaseBusiness className="h-4 w-4" /> Find local work
+            </Link>
           </div>
         </div>
       </div>
@@ -111,14 +83,14 @@ function Hero() {
 
 function CategoryGrid() {
   return (
-    <section className="py-16 md:py-20">
+    <section className="py-14 md:py-18">
       <div className="container-x">
         <SectionHead
-          eyebrow="Services"
-          title="Browse by category"
-          subtitle="From quick fixes to full home projects — find the right pro in seconds."
+          eyebrow="Start with a service"
+          title="What needs doing?"
+          subtitle="Choose a category to browse local profiles and find the right person for the job."
         />
-        <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
           {CATEGORIES.map((c) => {
             const Icon = c.icon;
             return (
@@ -126,14 +98,13 @@ function CategoryGrid() {
                 key={c.slug}
                 to="/workers"
                 search={{ category: c.slug }}
-                className="group rounded-2xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                className="group flex min-h-28 flex-col items-start justify-between border-t-2 border-border py-4 transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <span className={`grid h-11 w-11 place-items-center rounded-xl ${c.tint === "green" ? "bg-primary-soft text-primary" : "bg-accent-soft text-accent"}`}>
+                <span className={`grid h-10 w-10 place-items-center rounded-md ${c.tint === "green" ? "bg-primary-soft text-primary" : "bg-accent-soft text-accent"}`}>
                   <Icon className="h-5 w-5" />
                 </span>
-                <p className="mt-3 text-sm font-semibold text-ink">{c.name}</p>
-                <span className="mt-1 inline-flex items-center text-xs text-muted-foreground group-hover:text-primary">
-                  Explore <ArrowRight className="ml-1 h-3 w-3" />
+                <span className="mt-3 flex w-full items-center justify-between gap-2 text-sm font-semibold text-ink group-hover:text-primary">
+                  {c.name}<ArrowRight className="h-4 w-4 shrink-0" />
                 </span>
               </Link>
             );
@@ -146,23 +117,25 @@ function CategoryGrid() {
 
 function HowItWorks() {
   const steps = [
-    { icon: ClipboardList, title: "Post your job", desc: "Tell us what you need, when, and where. Takes 30 seconds." },
-    { icon: Users, title: "Get instant offers", desc: "Nearby verified workers send price + ETA in real time." },
-    { icon: CheckCircle2, title: "Hire & rate", desc: "Pick the best fit, get the job done, leave a review." },
+    { icon: ClipboardList, title: "Describe the job", desc: "Share the work, timing and location so nearby professionals know what you need." },
+    { icon: Users, title: "Compare your options", desc: "Review worker profiles and offers, or contact a professional directly." },
+    { icon: CheckCircle2, title: "Choose your match", desc: "Select the person who suits your job and keep track as the work progresses." },
   ];
   return (
-    <section className="bg-secondary/40 py-16 md:py-20">
+    <section className="bg-secondary/50 py-14 md:py-20">
       <div className="container-x">
-        <SectionHead eyebrow="How it works" title="From request to result in 3 steps" subtitle="Reverse matching — you stop searching, workers come to you." />
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <SectionHead eyebrow="Simple from the start" title="A clearer way to get work done" subtitle="Post a request and compare offers, or browse profiles when you already know what you need." />
+        <div className="mt-10 grid gap-7 md:grid-cols-3 md:gap-10">
           {steps.map((s, i) => {
             const Icon = s.icon;
             return (
-              <div key={s.title} className="relative rounded-2xl border border-border bg-card p-6">
-                <span className="absolute -top-3 left-6 rounded-full brand-gradient px-2.5 py-0.5 text-xs font-semibold text-white">Step {i + 1}</span>
-                <Icon className="h-7 w-7 text-primary" />
-                <h3 className="mt-4 text-lg font-semibold text-ink">{s.title}</h3>
-                <p className="mt-1.5 text-sm text-muted-foreground">{s.desc}</p>
+              <div key={s.title} className="border-t border-border pt-5">
+                <div className="flex items-center gap-3">
+                  <span className="font-display text-sm font-semibold text-primary">0{i + 1}</span>
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="mt-4 font-display text-lg font-semibold text-ink">{s.title}</h3>
+                <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
               </div>
             );
           })}
@@ -172,83 +145,32 @@ function HowItWorks() {
   );
 }
 
-const FEATURED = [
-  { id: "1", name: "Anita Sharma", role: "House Cleaner", rating: 4.9, reviews: 184, price: "₹350/hr", distance: "1.2 km", verified: true, img: workerCleaner },
-  { id: "2", name: "Rohit Verma", role: "Plumber", rating: 4.8, reviews: 142, price: "₹500/hr", distance: "2.4 km", verified: true, img: workerPlumber },
-  { id: "3", name: "Daniel Pereira", role: "Carpenter", rating: 4.9, reviews: 96, price: "₹600/hr", distance: "3.1 km", verified: true, img: workerCarpenter },
-];
-
-function FeaturedWorkers() {
+function CommunitySection() {
   return (
-    <section className="py-16 md:py-20">
+    <section className="py-14 md:py-20">
       <div className="container-x">
-        <div className="flex items-end justify-between gap-4">
-          <SectionHead eyebrow="Top rated" title="Workers near you" subtitle="Verified profiles, real reviews, transparent pricing." align="left" />
-          <Button asChild variant="ghost" className="hidden sm:inline-flex">
-            <Link to="/workers">View all <ArrowRight className="h-4 w-4" /></Link>
-          </Button>
-        </div>
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          {FEATURED.map((w) => (
-            <article key={w.id} className="overflow-hidden rounded-2xl border border-border bg-card transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <div className="relative aspect-[4/3]">
-                <img loading="lazy" src={w.img} alt={w.name} className="h-full w-full object-cover" />
-                {w.verified && (
-                  <Badge className="absolute left-3 top-3 rounded-full bg-white text-ink hover:bg-white">
-                    <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Verified
-                  </Badge>
-                )}
-              </div>
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h3 className="truncate font-display text-base font-semibold text-ink">{w.name}</h3>
-                    <p className="text-sm text-muted-foreground">{w.role}</p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-1 rounded-md bg-primary-soft px-2 py-1 text-xs font-semibold text-primary">
-                    <Star className="h-3.5 w-3.5 fill-current" /> {w.rating}
-                  </div>
-                </div>
-                <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {w.distance}</span>
-                  <span>{w.reviews} reviews</span>
-                  <span className="font-semibold text-ink">{w.price}</span>
-                </div>
-                <div className="mt-4 grid grid-cols-3 gap-2">
-                  <Button size="sm" variant="outline"><Phone className="h-3.5 w-3.5" /></Button>
-                  <Button size="sm" variant="outline"><MessageSquare className="h-3.5 w-3.5" /></Button>
-                  <Button asChild size="sm"><Link to="/workers">Hire</Link></Button>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function EmergencyBanner() {
-  return (
-    <section className="py-12">
-      <div className="container-x">
-        <div className="overflow-hidden rounded-3xl border border-border bg-ink p-6 text-white sm:p-10">
-          <div className="grid items-center gap-6 md:grid-cols-[1fr_auto]">
-            <div className="min-w-0">
-              <Badge className="rounded-full bg-warning/20 text-warning hover:bg-warning/20">
-                <Bolt className="h-3.5 w-3.5" /> Emergency service
-              </Badge>
-              <h3 className="mt-3 font-display text-2xl font-bold sm:text-3xl">
-                Need a worker right now?
-              </h3>
-              <p className="mt-2 max-w-xl text-sm text-white/70 sm:text-base">
-                Post an emergency job and nearby workers get instant high-priority alerts.
-                Most are accepted within minutes.
-              </p>
+        <div className="grid gap-8 border-y border-border py-10 md:grid-cols-[1fr_1fr] md:gap-12 md:py-12">
+          <div>
+            <p className="text-sm font-semibold text-primary">Built for both sides of local work</p>
+            <h2 className="mt-2 max-w-xl font-display text-3xl font-bold text-ink sm:text-4xl">Good work starts with a good connection.</h2>
+          </div>
+          <div className="grid gap-7 sm:grid-cols-2">
+            <div>
+              <UserRound className="h-5 w-5 text-accent" />
+              <h3 className="mt-3 font-display font-semibold text-ink">For customers</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Browse worker profiles, compare incoming offers and follow an active job.</p>
+              <Button asChild variant="link" className="mt-2 h-auto px-0 text-primary">
+                <Link to="/auth" search={{ mode: "signup", role: "customer" }}>Get help nearby <ArrowRight className="h-4 w-4" /></Link>
+              </Button>
             </div>
-            <Button asChild size="lg" className="bg-warning text-ink hover:bg-warning/90">
-              <Link to="/dashboard">Post emergency job</Link>
-            </Button>
+            <div>
+              <Clock3 className="h-5 w-5 text-accent" />
+              <h3 className="mt-3 font-display font-semibold text-ink">For workers</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Create a professional profile and find jobs that fit your skills and schedule.</p>
+              <Button asChild variant="link" className="mt-2 h-auto px-0 text-primary">
+                <Link to="/auth" search={{ mode: "signup", role: "worker" }}>Find local work <ArrowRight className="h-4 w-4" /></Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -256,82 +178,12 @@ function EmergencyBanner() {
   );
 }
 
-function Stats() {
-  const stats = [
-    { v: "25K+", l: "Verified workers" },
-    { v: "180K+", l: "Jobs completed" },
-    { v: "120+", l: "Cities covered" },
-    { v: "4.9★", l: "Avg. rating" },
-  ];
+function SectionHead({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle?: string }) {
   return (
-    <section className="border-y border-border bg-secondary/40 py-12">
-      <div className="container-x grid grid-cols-2 gap-6 md:grid-cols-4">
-        {stats.map((s) => (
-          <div key={s.l} className="text-center">
-            <p className="font-display text-3xl font-bold text-ink md:text-4xl">{s.v}</p>
-            <p className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">{s.l}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function Testimonials() {
-  const items = [
-    { q: "Posted a plumbing job at 9pm. Had 4 offers in 6 minutes and the work was done by 10am next day.", n: "Priya R.", r: "Bengaluru" },
-    { q: "Best platform to find painters. Verified profiles, clear pricing, no haggling stress.", n: "Arjun K.", r: "Pune" },
-    { q: "I get steady work nearby and customers respect my time. Best app I've used as an electrician.", n: "Rakesh M.", r: "Delhi" },
-  ];
-  return (
-    <section className="py-16 md:py-20">
-      <div className="container-x">
-        <SectionHead eyebrow="Stories" title="Loved by customers and workers" />
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {items.map((t) => (
-            <figure key={t.n} className="rounded-2xl border border-border bg-card p-6">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <blockquote className="mt-3 text-sm text-ink">"{t.q}"</blockquote>
-              <figcaption className="mt-4 text-xs text-muted-foreground">
-                <span className="font-semibold text-ink">{t.n}</span> · {t.r}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function CTA() {
-  return (
-    <section className="py-16">
-      <div className="container-x">
-        <div className="overflow-hidden rounded-3xl brand-gradient p-8 text-center text-white sm:p-14">
-          <h3 className="font-display text-3xl font-bold sm:text-4xl">Get started in seconds</h3>
-          <p className="mx-auto mt-3 max-w-2xl text-white/85">
-            Whether you need help or want to earn — Local Work Network connects you to your neighborhood.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Button asChild size="lg" variant="secondary">
-              <Link to="/auth" search={{ mode: "signup", role: "customer" }}>I need a worker</Link>
-            </Button>
-            <Button asChild size="lg" className="bg-ink text-white hover:bg-ink/90">
-              <Link to="/auth" search={{ mode: "signup", role: "worker" }}>I want to work</Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function SectionHead({ eyebrow, title, subtitle, align = "center" }: { eyebrow: string; title: string; subtitle?: string; align?: "center" | "left" }) {
-  return (
-    <div className={align === "center" ? "mx-auto max-w-2xl text-center" : "max-w-2xl"}>
-      <p className="text-xs font-semibold uppercase tracking-wider text-primary">{eyebrow}</p>
+    <div className="max-w-2xl">
+      <p className="text-sm font-semibold text-primary">{eyebrow}</p>
       <h2 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">{title}</h2>
-      {subtitle && <p className="mt-3 text-muted-foreground">{subtitle}</p>}
+      {subtitle && <p className="mt-3 max-w-xl leading-relaxed text-muted-foreground">{subtitle}</p>}
     </div>
   );
 }
